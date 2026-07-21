@@ -293,7 +293,7 @@ function BottomNav({
         margin: "0 auto",
         display: "flex",
         justifyContent: "space-around",
-        padding: "12px 8px 20px",
+        padding: "12px 8px 25px",
         zIndex: 100,
       }}
     >
@@ -383,7 +383,7 @@ function HomeScreen({
   });
 
   return (
-    <div style={{ paddingBottom: 90 }}>
+    <div style={{ paddingBottom: 110 }}>
       <div
         style={{
           padding: "56px 20px 20px",
@@ -513,7 +513,7 @@ function CatalogScreen({
   });
 
   return (
-    <div style={{ paddingBottom: 90 }}>
+    <div style={{ paddingBottom: 110 }}>
       <div style={{ padding: "56px 20px 16px" }}>
         <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 16 }}>Каталог</div>
         <div style={{ display: "flex", gap: 10 }}>
@@ -567,7 +567,7 @@ function ProductScreen({
   const [qty, setQty] = useState(1);
 
   return (
-    <div style={{ paddingBottom: 120 }}>
+    <div style={{ paddingBottom: 140 }}>
       <div
         style={{
           height: 320,
@@ -613,7 +613,7 @@ function ProductScreen({
         </div>
       </div>
 
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 90px", background: "#0F1115" }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 105px", background: "#0F1115", zIndex: 90 }}>
         <button className="btn-primary" style={{ width: "100%", padding: "16px 0", fontSize: 16 }} onClick={() => onAddCart(product, qty)}>
           Добавить {product.price * qty} Kč
         </button>
@@ -645,7 +645,7 @@ function CartScreen({
   }
 
   return (
-    <div style={{ paddingBottom: 120, padding: "56px 20px 0" }}>
+    <div style={{ paddingBottom: 140, padding: "56px 20px 0" }}>
       <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 20 }}>Корзина</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
         {cart.map((item) => (
@@ -664,7 +664,7 @@ function CartScreen({
         ))}
       </div>
 
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 90px", background: "#0F1115" }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 105px", background: "#0F1115", zIndex: 90 }}>
         <button className="btn-primary" style={{ width: "100%", padding: "17px 0", fontSize: 16 }} onClick={onCheckout}>
           Оформить ({total} Kč)
         </button>
@@ -708,7 +708,7 @@ function CheckoutScreen({
   };
 
   return (
-    <div style={{ paddingBottom: 120, padding: "56px 20px 0" }}>
+    <div style={{ paddingBottom: 150, padding: "56px 20px 0" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
         <button onClick={onBack} style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(255,255,255,0.07)", border: "none" }}>
           <ChevronLeft size={18} color="#fff" />
@@ -788,7 +788,7 @@ function CheckoutScreen({
         </div>
       </div>
 
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 36px", background: "#0F1115" }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 105px", background: "#0F1115", zIndex: 90 }}>
         <button className="btn-primary" style={{ width: "100%", padding: "17px 0", fontSize: 16 }} onClick={handleConfirm}>
           Отправить заказ менеджеру
         </button>
