@@ -33,7 +33,7 @@ import {
   Droplets,
 } from "lucide-react";
 
-// ─── Telegram WebApp ──────────────────────────────────────────────────────────
+// ─── Telegram WebApp & Global Window ──────────────────────────────────────────
 
 declare global {
   interface Window {
@@ -53,6 +53,7 @@ declare global {
         ready?: () => void;
       };
     };
+    sendTelegramOrder?: (cart: CartItem[], total: number, details: { name: string; phone: string; address: string }) => void;
   }
 }
 
@@ -982,7 +983,7 @@ function ProductScreen({
         </div>
       </div>
 
-      {/* Fixed CTA — high enough above bottom nav */}
+      {/* Fixed CTA */}
       <div
         style={{
           position: "fixed",
@@ -1229,7 +1230,7 @@ function CartScreen({
         </div>
       </div>
 
-      {/* Fixed checkout button — above nav bar */}
+      {/* Fixed checkout button */}
       <div
         style={{
           position: "fixed",
@@ -1278,8 +1279,7 @@ function CheckoutScreen({
   const handleConfirm = () => {
     const itemLines = cart
       .map((i) => `• ${i.product.name} (${i.product.volume}, ${i.product.strength}) × ${i.qty} шт. = ${i.product.price * i.qty} Kč`)
-      .join("
-");
+      .join("\n");
 
     const deliveryStr =
       deliveryType === "courier"
@@ -1300,12 +1300,9 @@ function CheckoutScreen({
       itemLines,
       "",
       `💰 Итого: ${total} Kč`,
-    ].join("
-");
+    ].join("\n");
 
-    // Log for debug; actual sending is via Telegram link
-    console.log("Order for manager:
-" + msg);
+    console.log("Order for manager:\n" + msg);
 
     openManagerChat();
     onConfirm();
@@ -1565,7 +1562,7 @@ function CheckoutScreen({
         </div>
       </div>
 
-      {/* Fixed confirm button — clears bottom bar */}
+      {/* Fixed confirm button */}
       <div
         style={{
           position: "fixed",
@@ -1583,8 +1580,8 @@ function CheckoutScreen({
           className="btn-primary"
           style={{ width: "100%", padding: "17px 0", fontSize: 16 }}
           onClick={() => {
-            if (typeof (window as any).sendTelegramOrder === 'function') {
-              (window as any).sendTelegramOrder(
+            if (typeof window.sendTelegramOrder === 'function') {
+              window.sendTelegramOrder(
                 cart, 
                 total, 
                 { name: tgUsername || "Клиент", phone: "Из приложения", address: address || "Указан при связи" }
