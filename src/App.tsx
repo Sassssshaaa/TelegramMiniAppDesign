@@ -1122,9 +1122,16 @@ function CartScreen({
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <button
-                      onClick={() =>
-                        item.qty === 1 ? onRemove(item.product.id) : onUpdateQty(item.product.id, item.qty - 1)
-                      }
+                     onClick={() => {
+  if (typeof (window as any).sendTelegramOrder === 'function') {
+    (window as any).sendTelegramOrder(
+      cart, 
+      350, 
+      { name: tgUsername || "Клиент", phone: "Из приложения", address: "Указан при связи" }
+    );
+  }
+  if (onCheckout) onCheckout();
+}}
                       style={{
                         width: 30,
                         height: 30,
