@@ -1,4 +1,5 @@
 import { sendTelegramOrder } from './telegram';
+import { supabase } from './supabase';
 import { useState, useEffect } from "react";
 import {
   Home,
@@ -60,7 +61,7 @@ function getTelegramUser() {
 
 type Screen = "home" | "catalog" | "product" | "cart" | "checkout" | "success";
 
-interface Product {
+export interface Product {
   id: number;
   name: string;
   brand: string;
@@ -72,6 +73,7 @@ interface Product {
   reviews: number;
   category: string;
   inStock: boolean;
+  stock?: number;
   isNew?: boolean;
   isHot?: boolean;
   color: string;
@@ -84,28 +86,6 @@ interface CartItem {
   product: Product;
   qty: number;
 }
-
-const PRODUCTS: Product[] = [
-  {
-    id: 1,
-    name: "Apple Peach",
-    brand: "ElfLiq",
-    volume: "30 мл",
-    strength: "50 мг",
-    vgpg: "50/50",
-    price: 350,
-    rating: 4.9,
-    reviews: 874,
-    category: "Ягоды",
-    inStock: true,
-    isNew: true,
-    isHot: true,
-    color: "#FF6B9D",
-    accent: "#FFB347",
-    desc: "Сочное яблоко встречается со спелым персиком — освежающий фруктовый микс с нежным сладким послевкусием.",
-    img: "https://cheapvape.eu/1231-home_default/apple-peach-elfliq-30-ml-salt-50-mg.jpg",
-  },
-];
 
 const CATEGORIES = [
   { name: "Фрукты", icon: Droplets, color: "#FF8C42" },
@@ -160,6 +140,8 @@ function ProductCard({
   onAddCart: (p: Product) => void;
 }) {
   const [pressed, setPressed] = useState(false);
+  const isAvailable = product.inStock && (product.stock === undefined || product.stock > 0);
+
   return (
     <div
       className="product-card"
@@ -169,7 +151,7 @@ function ProductCard({
       <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 4, zIndex: 2, flexWrap: "wrap" }}>
         {product.isNew && <Badge text="NEW" color="#7CFF5B" />}
         {product.isHot && <Badge text="🔥 ХИТ" color="#FF6B35" />}
-        {!product.inStock && <Badge text="Нет" color="#FF4D6D" />}
+        {!isAvailable && <Badge text="Нет" color="#FF4D6D" />}
       </div>
 
       <div
@@ -196,21 +178,30 @@ function ProductCard({
       <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", marginBottom: 6 }}>{product.brand}</div>
 
       <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.06)", borderRadius: 6, padding: "2px 6px" }}>
-          {product.volume}
-        </span>
-        <span style={{ fontSize: 10, color: product.color, background: product.color + "18", borderRadius: 6, padding: "2px 6px" }}>
-          {product.strength}
-        </span>
+        {product.volume && (
+          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.06)", borderRadius: 6, padding: "2px 6px" }}>
+            {product.volume}
+          </span>
+        )}
+        {product.strength && (
+          <span style={{ fontSize: 10, color: product.color || "#7CFF5B", background: (product.color || "#7CFF5B") + "18", borderRadius: 6, padding: "2px 6px" }}>
+            {product.strength}
+          </span>
+        )}
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 10 }}>
-        <Stars rating={product.rating} />
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{product.rating}</span>
+        <Stars rating={product.rating || 5} />
+        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{product.rating || 5}</span>
       </div>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ fontSize: 17, fontWeight: 800, color: "#7CFF5B" }}>{product.price} Kč</div>
+        <div>
+          <div style={{ fontSize: 17, fontWeight: 800, color: "#7CFF5B" }}>{product.price} Kč</div>
+          {product.stock !== undefined && (
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>Остаток: {product.stock} шт.</div>
+          )}
+        </div>
         <button
           className="btn-primary"
           style={{
@@ -220,15 +211,15 @@ function ProductCard({
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 13,
-            opacity: product.inStock ? 1 : 0.4,
+            opacity: isAvailable ? 1 : 0.4,
             transform: pressed ? "scale(0.9)" : undefined,
           }}
-          disabled={!product.inStock}
+          disabled={!isAvailable}
           onPointerDown={() => setPressed(true)}
           onPointerUp={() => setPressed(false)}
           onClick={(e) => {
             e.stopPropagation();
-            if (product.inStock) onAddCart(product);
+            if (isAvailable) onAddCart(product);
           }}
         >
           <Plus size={18} color="#0F1115" strokeWidth={3} />
@@ -293,7 +284,7 @@ function BottomNav({
         maxWidth: 390,
         margin: "0 auto",
         display: "flex",
-        justify: "space-around",
+        justifyContent: "space-around",
         padding: "12px 8px 20px",
         zIndex: 100,
       }}
@@ -350,11 +341,14 @@ function BottomNav({
 }
 
 function HomeScreen({
+  products,
+  loading,
   onSelectProduct,
   onAddCart,
-  onNav,
   tgFirstName,
 }: {
+  products: Product[];
+  loading: boolean;
   onSelectProduct: (p: Product) => void;
   onAddCart: (p: Product) => void;
   onNav: (s: Screen) => void;
@@ -365,12 +359,12 @@ function HomeScreen({
 
   const greeting = tgFirstName ? `Привет, ${tgFirstName}!` : "Привет!";
 
-  const displayed = PRODUCTS.filter((p) => {
+  const displayed = products.filter((p) => {
     if (activeCategory && p.category !== activeCategory) return false;
     if (
       search &&
-      !p.name.toLowerCase().includes(search.toLowerCase()) &&
-      !p.brand.toLowerCase().includes(search.toLowerCase())
+      !p.name?.toLowerCase().includes(search.toLowerCase()) &&
+      !p.brand?.toLowerCase().includes(search.toLowerCase())
     )
       return false;
     return true;
@@ -468,11 +462,15 @@ function HomeScreen({
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            {displayed.map((p) => (
-              <ProductCard key={p.id} product={p} onSelect={onSelectProduct} onAddCart={onAddCart} />
-            ))}
-          </div>
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "40px 0", color: "rgba(255,255,255,0.5)" }}>Загрузка товаров...</div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              {displayed.map((p) => (
+                <ProductCard key={p.id} product={p} onSelect={onSelectProduct} onAddCart={onAddCart} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -480,25 +478,23 @@ function HomeScreen({
 }
 
 function CatalogScreen({
+  products,
+  loading,
   onSelectProduct,
   onAddCart,
 }: {
+  products: Product[];
+  loading: boolean;
   onSelectProduct: (p: Product) => void;
   onAddCart: (p: Product) => void;
 }) {
-  const [strength] = useState<string | null>(null);
-  const [category] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [maxPrice] = useState(2000);
 
-  const filtered = PRODUCTS.filter((p) => {
-    if (strength && p.strength !== strength) return false;
-    if (category && p.category !== category) return false;
-    if (p.price > maxPrice) return false;
+  const filtered = products.filter((p) => {
     if (
       search &&
-      !p.name.toLowerCase().includes(search.toLowerCase()) &&
-      !p.brand.toLowerCase().includes(search.toLowerCase())
+      !p.name?.toLowerCase().includes(search.toLowerCase()) &&
+      !p.brand?.toLowerCase().includes(search.toLowerCase())
     )
       return false;
     return true;
@@ -529,29 +525,19 @@ function CatalogScreen({
               style={{ flex: 1, background: "none", border: "none", outline: "none", color: "#fff", fontSize: 14, padding: "12px 0" }}
             />
           </div>
-          <button
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 14,
-              background: "rgba(255,255,255,0.07)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Filter size={18} color="rgba(255,255,255,0.6)" />
-          </button>
         </div>
       </div>
 
       <div style={{ padding: "0 20px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          {filtered.map((p) => (
-            <ProductCard key={p.id} product={p} onSelect={onSelectProduct} onAddCart={onAddCart} />
-          ))}
-        </div>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "40px 0", color: "rgba(255,255,255,0.5)" }}>Загрузка товаров...</div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {filtered.map((p) => (
+              <ProductCard key={p.id} product={p} onSelect={onSelectProduct} onAddCart={onAddCart} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -816,7 +802,32 @@ export default function App() {
   const [prevScreen, setPrevScreen] = useState<Screen>("home");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const { firstName, username } = getTelegramUser();
+
+  // Загружаем товары из Supabase
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase.from('products').select('*');
+        if (error) {
+          console.error("Ошибка при получении товаров из Supabase:", error);
+        } else if (data) {
+          setProducts(data);
+        }
+      } catch (err) {
+        console.error("Ошибка запроса:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
     try {
@@ -860,8 +871,8 @@ export default function App() {
     <div style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#0F1115", position: "relative" }}>
       {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
 
-      {screen === "home" && <HomeScreen onSelectProduct={selectProduct} onAddCart={addToCart} onNav={navigate} tgFirstName={firstName} />}
-      {screen === "catalog" && <CatalogScreen onSelectProduct={selectProduct} onAddCart={addToCart} />}
+      {screen === "home" && <HomeScreen products={products} loading={loading} onSelectProduct={selectProduct} onAddCart={addToCart} onNav={navigate} tgFirstName={firstName} />}
+      {screen === "catalog" && <CatalogScreen products={products} loading={loading} onSelectProduct={selectProduct} onAddCart={addToCart} />}
       {screen === "product" && selectedProduct && <ProductScreen product={selectedProduct} onBack={() => navigate(prevScreen)} onAddCart={(p, q) => { addToCart(p, q); navigate("cart"); }} />}
       {screen === "cart" && <CartScreen cart={cart} onUpdateQty={updateQty} onRemove={removeFromCart} onCheckout={() => navigate("checkout")} />}
       {screen === "checkout" && <CheckoutScreen cart={cart} tgUsername={username} onBack={() => navigate("cart")} onConfirm={() => { setCart([]); navigate("success"); }} />}
