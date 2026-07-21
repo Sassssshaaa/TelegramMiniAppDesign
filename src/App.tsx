@@ -1,5 +1,5 @@
 import { sendTelegramOrder } from './telegram';
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Home,
   Grid3X3,
@@ -7,17 +7,13 @@ import {
   Search,
   Star,
   Plus,
-  Minus,
-  Trash2,
   ChevronLeft,
-  Tag,
   Heart,
   CheckCircle,
   MapPin,
   Wallet,
   Filter,
   X,
-  Clock,
   Zap,
   Wind,
   Flame,
@@ -59,19 +55,6 @@ function getTelegramUser() {
     };
   } catch {
     return { firstName: null, username: null, id: null };
-  }
-}
-
-function openManagerChat() {
-  try {
-    const tg = window.Telegram?.WebApp;
-    if (tg?.openTelegramLink) {
-      tg.openTelegramLink("https://t.me/Manager_cloud_kopr");
-    } else {
-      window.open("https://t.me/Manager_cloud_kopr", "_blank");
-    }
-  } catch {
-    window.open("https://t.me/Manager_cloud_kopr", "_blank");
   }
 }
 
@@ -310,7 +293,7 @@ function BottomNav({
         maxWidth: 390,
         margin: "0 auto",
         display: "flex",
-        justifyContent: "space-around",
+        justify: "space-around",
         padding: "12px 8px 20px",
         zIndex: 100,
       }}
@@ -369,6 +352,7 @@ function BottomNav({
 function HomeScreen({
   onSelectProduct,
   onAddCart,
+  onNav,
   tgFirstName,
 }: {
   onSelectProduct: (p: Product) => void;
@@ -502,11 +486,10 @@ function CatalogScreen({
   onSelectProduct: (p: Product) => void;
   onAddCart: (p: Product) => void;
 }) {
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [strength, setStrength] = useState<string | null>(null);
-  const [category, setCategory] = useState<string | null>(null);
+  const [strength] = useState<string | null>(null);
+  const [category] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [maxPrice, setMaxPrice] = useState(2000);
+  const [maxPrice] = useState(2000);
 
   const filtered = PRODUCTS.filter((p) => {
     if (strength && p.strength !== strength) return false;
@@ -547,7 +530,6 @@ function CatalogScreen({
             />
           </div>
           <button
-            onClick={() => setFilterOpen(true)}
             style={{
               width: 48,
               height: 48,
