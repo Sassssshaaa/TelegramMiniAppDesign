@@ -1122,16 +1122,7 @@ function CartScreen({
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <button
-                     onClick={() => {
-  if (typeof (window as any).sendTelegramOrder === 'function') {
-    (window as any).sendTelegramOrder(
-      cart, 
-      350, 
-      { name: tgUsername || "Клиент", phone: "Из приложения", address: "Указан при связи" }
-    );
-  }
-  if (onCheckout) onCheckout();
-}}
+
                       style={{
                         width: 30,
                         height: 30,
@@ -1588,8 +1579,16 @@ function CheckoutScreen({
         <button
           className="btn-primary"
           style={{ width: "100%", padding: "17px 0", fontSize: 16 }}
-          onClick={handleConfirm}
-        >
+onClick={() => {
+  if (typeof (window as any).sendTelegramOrder === 'function') {
+    (window as any).sendTelegramOrder(
+      cart, 
+      total, 
+      { name: tgUsername || "Клиент", phone: "Из приложения", address: "Указан при связи" }
+    );
+  }
+  handleConfirm();
+}}        >
           Подтвердить заказ
         </button>
       </div>
