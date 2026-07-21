@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { sendTelegramOrder } from "./telegram";
 import { supabase } from "./supabase";
-import {
+import { 
   Home,
   Grid3X3,
   ShoppingCart,
