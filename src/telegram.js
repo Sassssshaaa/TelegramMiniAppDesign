@@ -27,12 +27,14 @@ export const sendTelegramOrder = async (cart, total, customerData) => {
       text: message,
       parse_mode: 'HTML'
     })
-  }).then(res => {
+ }).then(res => {
     if (res.ok) {
       tg?.showAlert("Заказ отправлен продавцу!");
     } else {
-      alert(" Ошибка отправки заказа");
-      window.sendTelegramOrder = sendTelegramOrder;
+      alert("Ошибка отправки заказа");
     }
   });
 };
+
+// ВОТ ЗДЕСЬ В САМОМ КОНЦЕ (вне функции):
+window.sendTelegramOrder = sendTelegramOrder;
