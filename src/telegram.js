@@ -32,6 +32,7 @@ export const sendTelegramOrder = async (cart, total, customerData) => {
       tg?.showAlert("Заказ отправлен продавцу!");
     } else {
       alert(" Ошибка отправки заказа");
+      window.sendTelegramOrder = sendTelegramOrder;
     }
   });
 };
