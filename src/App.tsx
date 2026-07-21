@@ -1,3 +1,4 @@
+import { sendTelegramOrder } from './telegram';
 import { useState, useEffect, useRef } from "react";
 import {
   Home,
@@ -1247,14 +1248,14 @@ function CartScreen({
         <button
           className="btn-primary"
           style={{ width: "100%", padding: "17px 0", fontSize: 16 }}
-          onClick={onCheckout}
-        >
-          Оформить заказ →
-        </button>
-      </div>
-    </div>
+  onClick={() => {
+  sendTelegramOrder(
+    cart, 
+    350, 
+    { name: tgUsername || "Клиент", phone: "Из приложения", address: "Указан при связи" }
   );
-}
+  if (onCheckout) onCheckout();
+}}
 
 // ─── Checkout Screen ──────────────────────────────────────────────────────────
 
