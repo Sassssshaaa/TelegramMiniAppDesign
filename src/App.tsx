@@ -1122,7 +1122,7 @@ function CartScreen({
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <button
-
+                      onClick={() => item.qty === 1 ? onRemove(item.product.id) : onUpdateQty(item.product.id, item.qty - 1)}
                       style={{
                         width: 30,
                         height: 30,
@@ -1246,14 +1246,14 @@ function CartScreen({
         <button
           className="btn-primary"
           style={{ width: "100%", padding: "17px 0", fontSize: 16 }}
-  onClick={() => {
-  sendTelegramOrder(
-    cart, 
-    350, 
-    { name: tgUsername || "Клиент", phone: "Из приложения", address: "Указан при связи" }
+          onClick={onCheckout}
+        >
+          Оформить заказ →
+        </button>
+      </div>
+    </div>
   );
-  if (onCheckout) onCheckout();
-}}
+}
 
 // ─── Checkout Screen ──────────────────────────────────────────────────────────
 
@@ -1278,7 +1278,8 @@ function CheckoutScreen({
   const handleConfirm = () => {
     const itemLines = cart
       .map((i) => `• ${i.product.name} (${i.product.volume}, ${i.product.strength}) × ${i.qty} шт. = ${i.product.price * i.qty} Kč`)
-      .join("\n");
+      .join("
+");
 
     const deliveryStr =
       deliveryType === "courier"
@@ -1299,10 +1300,12 @@ function CheckoutScreen({
       itemLines,
       "",
       `💰 Итого: ${total} Kč`,
-    ].join("\n");
+    ].join("
+");
 
     // Log for debug; actual sending is via Telegram link
-    console.log("Order for manager:\n" + msg);
+    console.log("Order for manager:
+" + msg);
 
     openManagerChat();
     onConfirm();
@@ -1579,16 +1582,17 @@ function CheckoutScreen({
         <button
           className="btn-primary"
           style={{ width: "100%", padding: "17px 0", fontSize: 16 }}
-onClick={() => {
-  if (typeof (window as any).sendTelegramOrder === 'function') {
-    (window as any).sendTelegramOrder(
-      cart, 
-      total, 
-      { name: tgUsername || "Клиент", phone: "Из приложения", address: "Указан при связи" }
-    );
-  }
-  handleConfirm();
-}}        >
+          onClick={() => {
+            if (typeof (window as any).sendTelegramOrder === 'function') {
+              (window as any).sendTelegramOrder(
+                cart, 
+                total, 
+                { name: tgUsername || "Клиент", phone: "Из приложения", address: address || "Указан при связи" }
+              );
+            }
+            handleConfirm();
+          }}
+        >
           Подтвердить заказ
         </button>
       </div>
