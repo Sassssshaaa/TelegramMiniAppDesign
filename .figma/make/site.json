@@ -1,0 +1,10 @@
+{
+  "description": "This premium Telegram Mini App offers a sleek, user-friendly platform for purchasing e-liquid flavors, featuring intuitive navigation and attractive product displays.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
