@@ -1,25 +1,24 @@
-export const sendTelegramOrder = async (cart, total, customerData) => {
+export async function sendTelegramOrder(cart, total, customerData) {
   const tg = window.Telegram?.WebApp;
   tg?.expand();
 
   const user = tg?.initDataUnsafe?.user || {};
   const username = user.username ? `@${user.username}` : 'без username';
 
-  // 1. Токен бота и ID чата
+  // Токен твоего бота и твой Chat ID
   const BOT_TOKEN = "8800322131:AAGyDmhejJga0F65FobakauJdTcRE_8KPnw";
   const ADMIN_CHAT_ID = "8461436945";
 
-  // 2. Формируем список купленных товаров
+  // Собираем товары
   const itemsList = cart
     .map(
       (item) =>
-        `• <b>${item.product.name}</b> (${item.product.volume}) × ${item.qty} шт. = ${
+        `• <b>${item.product.name}</b> (${item.product.volume || ''}) × ${item.qty} шт. = ${
           item.product.price * item.qty
         } Kč`
     )
     .join("\n");
 
-  // 3. Собираем текст сообщения
   const message = `
 🚨 <b>НОВЫЙ ЗАКАЗ!</b>
 
@@ -33,7 +32,6 @@ ${itemsList}
 💰 <b>Итого к оплате:</b> ${total} Kč
   `;
 
-  // 4. Отправляем через Bot API
   try {
     const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST',
@@ -45,13 +43,9 @@ ${itemsList}
       }),
     });
 
-    if (res.ok) {
-      tg?.showAlert("Заказ успешно отправлен продавцу!");
-    } else {
-      alert("Ошибка отправки заказа. Попробуйте еще раз.");
-    }
+    return res.ok;
   } catch (error) {
     console.error("Ошибка при отправке заказа:", error);
-    alert("Не удалось отправить заказ. Проверьте интернет-соединение.");
+    return false;
   }
-};
+}
