@@ -684,16 +684,18 @@ function CheckoutScreen({
   onBack: () => void;
   onConfirm: () => void;
 }) {
-  const [deliveryType, setDeliveryType] = useState<"courier" | "pickup">("courier");
-  const [payment, setPayment] = useState<"cash" | "crypto">("cash");
+  const [deliveryType, setDeliveryType] = useState<"delivery" | "pickup">("delivery");
+  const [payment, setPayment] = useState<"crypto" | "cash">("crypto");
   const [tg, setTg] = useState(tgUsername ? `@${tgUsername}` : "");
   const [address, setAddress] = useState("");
 
-  const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
+  const itemsTotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
+  const deliveryFee = deliveryType === "delivery" ? 79 : 0;
+  const total = itemsTotal + deliveryFee;
 
   const handleConfirm = () => {
-    const deliveryStr = deliveryType === "courier" ? `Курьер (Адрес: ${address || "не указан"})` : "Самовывоз";
-    const paymentStr = payment === "cash" ? "Наличные" : "Криптовалюта (USDT/TON)";
+    const deliveryStr = deliveryType === "delivery" ? `Доставка +79 Kč (Адрес: ${address || "не указан"})` : "Самовывоз (в округах Ostrava)";
+    const paymentStr = deliveryType === "delivery" ? "Криптовалюта (USDT)" : (payment === "cash" ? "Наличные" : "Криптовалюта (USDT)");
 
     if (typeof sendTelegramOrder === "function") {
       sendTelegramOrder(cart, total, {
@@ -719,25 +721,36 @@ function CheckoutScreen({
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>СПОСОБ ПОЛУЧЕНИЯ</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {["courier", "pickup"].map((id) => (
+          {[
+            { id: "delivery", label: "Доставка", sub: "+ 79 Kč" },
+            { id: "pickup", label: "Самовывоз", sub: "в округах Ostrava" },
+          ].map((opt) => (
             <button
-              key={id}
-              onClick={() => setDeliveryType(id as "courier" | "pickup")}
+              key={opt.id}
+              onClick={() => {
+                setDeliveryType(opt.id as "delivery" | "pickup");
+                if (opt.id === "delivery") setPayment("crypto");
+              }}
               style={{
-                padding: "14px 0",
+                padding: "12px 10px",
                 borderRadius: 14,
-                background: deliveryType === id ? "rgba(124,255,91,0.12)" : "rgba(255,255,255,0.05)",
-                border: deliveryType === id ? "1.5px solid #7CFF5B" : "1px solid rgba(255,255,255,0.08)",
-                color: deliveryType === id ? "#7CFF5B" : "#fff",
+                background: deliveryType === opt.id ? "rgba(124,255,91,0.12)" : "rgba(255,255,255,0.05)",
+                border: deliveryType === opt.id ? "1.5px solid #7CFF5B" : "1px solid rgba(255,255,255,0.08)",
+                color: deliveryType === opt.id ? "#7CFF5B" : "#fff",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 2,
               }}
             >
-              {id === "courier" ? "🛵 Курьер" : "🏪 Самовывоз"}
+              <span style={{ fontSize: 14, fontWeight: 700 }}>{opt.id === "delivery" ? "🛵 Доставка" : "🏪 Самовывоз"}</span>
+              <span style={{ fontSize: 10, color: deliveryType === opt.id ? "rgba(124,255,91,0.8)" : "rgba(255,255,255,0.4)" }}>{opt.sub}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {deliveryType === "courier" && (
+      {deliveryType === "delivery" && (
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>АДРЕС ДОСТАВКИ</div>
           <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px", display: "flex", alignItems: "center", gap: 10 }}>
@@ -757,10 +770,13 @@ function CheckoutScreen({
       <div style={{ marginBottom: 24 }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>СПОСОБ ОПЛАТЫ</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {[
-            { id: "cash", label: "Наличные", sub: "При получении", icon: Wallet },
-            { id: "crypto", label: "Криптовалюта", sub: "USDT / TON", icon: Zap },
-          ].map((opt) => {
+          {(deliveryType === "delivery" 
+            ? [{ id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap }]
+            : [
+                { id: "cash", label: "Наличные", sub: "При получении", icon: Wallet },
+                { id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap },
+              ]
+          ).map((opt) => {
             const Icon = opt.icon;
             return (
               <button
@@ -790,7 +806,7 @@ function CheckoutScreen({
 
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 105px", background: "#0F1115", zIndex: 90 }}>
         <button className="btn-primary" style={{ width: "100%", padding: "17px 0", fontSize: 16 }} onClick={handleConfirm}>
-          Отправить заказ менеджеру
+          Отправить заказ ({total} Kč)
         </button>
       </div>
     </div>
