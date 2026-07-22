@@ -93,7 +93,7 @@ interface CartItem {
 }
 
 const CATEGORIES = [
-  { name: "Фрукты", icon: Droplets, color: "#FF8C42" },
+
   { name: "Ягоды", icon: Heart, color: "#FF4D6D" },
   { name: "Лед", icon: Snowflake, color: "#4DA6FF" },
   { name: "Напитки", icon: Coffee, color: "#FF6B35" },
