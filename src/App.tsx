@@ -20,7 +20,6 @@ import {
   Snowflake,
   Candy,
   Coffee,
-  Droplets,
 } from "lucide-react";
 
 declare global {
@@ -93,7 +92,6 @@ interface CartItem {
 }
 
 const CATEGORIES = [
-
   { name: "Ягоды", icon: Heart, color: "#FF4D6D" },
   { name: "Лед", icon: Snowflake, color: "#4DA6FF" },
   { name: "Напитки", icon: Coffee, color: "#FF6B35" },
@@ -836,7 +834,27 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const { firstName, username } = getTelegramUser();
+  const { firstName, username, id: telegramId } = getTelegramUser();
+
+  // Автоматическое сохранение пользователя в таблицу users в Supabase
+  useEffect(() => {
+    async function saveUser() {
+      if (!telegramId) return;
+      try {
+        const { error } = await supabase
+          .from("users")
+          .upsert({ telegram_id: telegramId }, { onConflict: "telegram_id" });
+
+        if (error) {
+          console.error("Ошибка сохранения пользователя в базу:", error);
+        }
+      } catch (err) {
+        console.error("Ошибка запроса при сохранении юзера:", err);
+      }
+    }
+
+    saveUser();
+  }, [telegramId]);
 
   useEffect(() => {
     async function fetchProducts() {
