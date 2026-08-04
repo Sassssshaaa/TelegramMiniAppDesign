@@ -167,7 +167,7 @@ function ProductCard({
           height: 160,
           background: "#1A1D24",
           display: "flex",
-          alignItems: "center",
+          alignItems: "center",        
           justifyContent: "center",
         }}
       >
