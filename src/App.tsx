@@ -14,7 +14,6 @@ import {
   MapPin,
   Wallet,
   X,
-  Zap,
   Wind,
   Flame,
   Snowflake,
@@ -700,7 +699,6 @@ function CheckoutScreen({
       else paymentStr = "Криптовалюта (USDT)";
     } else {
       if (payment === "cash") paymentStr = "Наличные";
-      else if (payment === "card") paymentStr = "Оплата ₴ на карту";
       else paymentStr = "Криптовалюта (USDT)";
     }
 
@@ -736,7 +734,7 @@ function CheckoutScreen({
               key={opt.id}
               onClick={() => {
                 setDeliveryType(opt.id as "delivery" | "pickup");
-                if (opt.id === "delivery" && payment === "cash") setPayment("crypto");
+                if (opt.id === "pickup" && payment === "card") setPayment("crypto");
               }}
               style={{
                 padding: "12px 10px",
@@ -780,12 +778,11 @@ function CheckoutScreen({
           {(deliveryType === "delivery" 
             ? [
                 { id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap },
-                { id: "card", label: "🇺🇦 Оплата ₴ на карту", sub: "Украинская карта", icon: CreditCard }
+                { id: "card", label: "Оплата ₴ на карту 🇺🇦", sub: "Украинская карта", icon: CreditCard }
               ]
             : [
                 { id: "cash", label: "Наличные", sub: "При получении", icon: Wallet },
                 { id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap },
-                { id: "card", label: "🇺🇦 Оплата ₴ на карту", sub: "Украинская карта", icon: CreditCard },
               ]
           ).map((opt) => {
             const Icon = opt.icon;
@@ -806,7 +803,7 @@ function CheckoutScreen({
               >
                 <Icon size={20} color={payment === opt.id ? "#7CFF5B" : "rgba(255,255,255,0.4)"} />
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: payment === opt.id ? "#7CFF5B" : "#fff" }}>{opt.label}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: payment === opt.id ? "#7CFF5B" : "#fff" }}>{opt.label}</div>
                   <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>{opt.sub}</div>
                 </div>
               </button>
@@ -849,7 +846,6 @@ export default function App() {
 
   const { firstName, username, id: telegramId } = getTelegramUser();
 
-  // Автоматическое сохранение пользователя в таблицу users в Supabase
   useEffect(() => {
     async function saveUser() {
       if (!telegramId) return;
