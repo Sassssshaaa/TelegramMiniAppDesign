@@ -101,6 +101,8 @@ const CATEGORIES = [
   { name: "Мята", icon: Wind, color: "#7CFF5B" },
 ];
 
+const BRANDS = ["ElfliQ", "Chaser"];
+
 function Stars({ rating }: { rating: number }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -363,6 +365,7 @@ function HomeScreen({
 }) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeBrand, setActiveBrand] = useState<string | null>(null);
 
   const greeting = tgFirstName ? `Привет, ${tgFirstName}!` : "Привет!";
 
@@ -370,6 +373,14 @@ function HomeScreen({
     if (search.trim()) {
       const q = search.toLowerCase().trim();
       return p.name?.toLowerCase().includes(q) || p.brand?.toLowerCase().includes(q);
+    }
+
+    if (activeBrand) {
+      const matchesBrand = p.brand?.trim().toLowerCase() === activeBrand.trim().toLowerCase();
+      if (activeCategory) {
+        return matchesBrand && p.category?.trim().toLowerCase() === activeCategory.trim().toLowerCase();
+      }
+      return matchesBrand;
     }
 
     if (activeCategory) {
@@ -433,7 +444,7 @@ function HomeScreen({
       </div>
 
       <div style={{ padding: "0 20px" }}>
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 14 }}>Категории</div>
           <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4 }}>
             {CATEGORIES.map((cat) => {
@@ -466,11 +477,41 @@ function HomeScreen({
           </div>
         </div>
 
+        {/* Бренды (ElfliQ и Chaser) */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 14 }}>Бренды</div>
+          <div style={{ display: "flex", gap: 10 }}>
+            {BRANDS.map((brandName) => {
+              const active = activeBrand === brandName;
+              return (
+                <button
+                  key={brandName}
+                  onClick={() => setActiveBrand(active ? null : brandName)}
+                  style={{
+                    flex: 1,
+                    padding: "12px 16px",
+                    borderRadius: 14,
+                    border: active ? "1.5px solid #7CFF5B" : "1px solid rgba(255,255,255,0.08)",
+                    background: active ? "rgba(124,255,91,0.15)" : "rgba(255,255,255,0.05)",
+                    color: active ? "#7CFF5B" : "#fff",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    textAlign: "center",
+                  }}
+              >
+                {brandName}
+              </button>
+            );
+          })}
+        </div>
+        </div>
+
         <div style={{ marginBottom: 8 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
             <div style={{ fontSize: 17, fontWeight: 700 }}>
-              {search ? `Результаты: «${search}»` : activeCategory ? activeCategory : "🔥 Популярные вкусы"}
-            </div>
+              {search ? `Результаты: «${search}»` : activeBrand ? `Бренд: ${activeBrand}` : activeCategory ? activeCategory : "🔥 Популярные вкусы"}
+          </div>
           </div>
 
           {loading ? (
@@ -484,7 +525,7 @@ function HomeScreen({
           )}
         </div>
       </div>
-    </div>
+  </div>
   );
 }
 
@@ -933,7 +974,7 @@ export default function App() {
           products={products}
           loading={loading}
           onSelectProduct={selectProduct}
-          onAddCart={addToCart}
+          onAddCart={(p) => addToCart(p, 1)}
           onNav={navigate}
           tgFirstName={firstName}
         />
@@ -944,7 +985,7 @@ export default function App() {
           products={products}
           loading={loading}
           onSelectProduct={selectProduct}
-          onAddCart={addToCart}
+          onAddCart={(p) => addToCart(p, 1)}
         />
       )}
 
@@ -952,9 +993,9 @@ export default function App() {
         <ProductScreen
           product={selectedProduct}
           onBack={() => navigate(prevScreen)}
-          onAddCart={(p, qty) => {
-            addToCart(p, qty);
-            navigate(prevScreen);
+          onAddCart={(p, q) => {
+            addToCart(p, q);
+            navigate("cart");
           }}
         />
       )}
@@ -981,17 +1022,10 @@ export default function App() {
       )}
 
       {screen === "success" && (
-        <SuccessScreen
-          onHome={() => {
-            setScreen("home");
-            if (window.Telegram?.WebApp?.openTelegramLink || window.Telegram?.WebApp?.openLink) {
-              // Возврат в магазин
-            }
-          }}
-        />
+        <SuccessScreen onHome={() => navigate("home")} />
       )}
 
-      {screen !== "product" && screen !== "success" && (
+      {screen !== "product" && screen !== "checkout" && screen !== "success" && (
         <BottomNav current={screen} cartCount={cartCount} onNav={navigate} />
       )}
     </div>
