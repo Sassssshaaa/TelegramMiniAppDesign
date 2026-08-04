@@ -20,6 +20,7 @@ import {
   Snowflake,
   Candy,
   Coffee,
+  CreditCard,
 } from "lucide-react";
 
 declare global {
@@ -683,7 +684,7 @@ function CheckoutScreen({
   onConfirm: () => void;
 }) {
   const [deliveryType, setDeliveryType] = useState<"delivery" | "pickup">("delivery");
-  const [payment, setPayment] = useState<"crypto" | "cash">("crypto");
+  const [payment, setPayment] = useState<"crypto" | "card" | "cash">("crypto");
   const [tg, setTg] = useState(tgUsername ? `@${tgUsername}` : "");
   const [address, setAddress] = useState("");
 
@@ -693,7 +694,15 @@ function CheckoutScreen({
 
   const handleConfirm = () => {
     const deliveryStr = deliveryType === "delivery" ? `Доставка +79 Kč (Адрес: ${address || "не указан"})` : "Самовывоз (в округах Ostrava)";
-    const paymentStr = deliveryType === "delivery" ? "Криптовалюта (USDT)" : (payment === "cash" ? "Наличные" : "Криптовалюта (USDT)");
+    let paymentStr = "Криптовалюта (USDT)";
+    if (deliveryType === "delivery") {
+      if (payment === "card") paymentStr = "Оплата ₴ на карту";
+      else paymentStr = "Криптовалюта (USDT)";
+    } else {
+      if (payment === "cash") paymentStr = "Наличные";
+      else if (payment === "card") paymentStr = "Оплата ₴ на карту";
+      else paymentStr = "Криптовалюта (USDT)";
+    }
 
     if (typeof sendTelegramOrder === "function") {
       sendTelegramOrder(cart, total, {
@@ -727,7 +736,7 @@ function CheckoutScreen({
               key={opt.id}
               onClick={() => {
                 setDeliveryType(opt.id as "delivery" | "pickup");
-                if (opt.id === "delivery") setPayment("crypto");
+                if (opt.id === "delivery" && payment === "cash") setPayment("crypto");
               }}
               style={{
                 padding: "12px 10px",
@@ -769,17 +778,21 @@ function CheckoutScreen({
         <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>СПОСОБ ОПЛАТЫ</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {(deliveryType === "delivery" 
-            ? [{ id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap }]
+            ? [
+                { id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap },
+                { id: "card", label: "🇺🇦 Оплата ₴ на карту", sub: "Украинская карта", icon: CreditCard }
+              ]
             : [
                 { id: "cash", label: "Наличные", sub: "При получении", icon: Wallet },
                 { id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap },
+                { id: "card", label: "🇺🇦 Оплата ₴ на карту", sub: "Украинская карта", icon: CreditCard },
               ]
           ).map((opt) => {
             const Icon = opt.icon;
             return (
               <button
                 key={opt.id}
-                onClick={() => setPayment(opt.id as "cash" | "crypto")}
+                onClick={() => setPayment(opt.id as "cash" | "crypto" | "card")}
                 style={{
                   padding: "14px 16px",
                   borderRadius: 14,
@@ -928,6 +941,7 @@ export default function App() {
           tgFirstName={firstName}
         />
       )}
+
       {screen === "catalog" && (
         <CatalogScreen
           products={products}
@@ -936,16 +950,18 @@ export default function App() {
           onAddCart={addToCart}
         />
       )}
+
       {screen === "product" && selectedProduct && (
         <ProductScreen
           product={selectedProduct}
           onBack={() => navigate(prevScreen)}
-          onAddCart={(p, q) => {
-            addToCart(p, q);
-            navigate("cart");
+          onAddCart={(p, qty) => {
+            addToCart(p, qty);
+            navigate(prevScreen);
           }}
         />
       )}
+
       {screen === "cart" && (
         <CartScreen
           cart={cart}
@@ -954,6 +970,7 @@ export default function App() {
           onCheckout={() => navigate("checkout")}
         />
       )}
+
       {screen === "checkout" && (
         <CheckoutScreen
           cart={cart}
@@ -965,9 +982,21 @@ export default function App() {
           }}
         />
       )}
-      {screen === "success" && <SuccessScreen onHome={() => navigate("home")} />}
 
-      {screen !== "success" && <BottomNav current={screen} cartCount={cartCount} onNav={navigate} />}
+      {screen === "success" && (
+        <SuccessScreen
+          onHome={() => {
+            setScreen("home");
+            if (window.Telegram?.WebApp?.openTelegramLink || window.Telegram?.WebApp?.openLink) {
+              // Возврат в магазин
+            }
+          }}
+        />
+      )}
+
+      {screen !== "product" && screen !== "success" && (
+        <BottomNav current={screen} cartCount={cartCount} onNav={navigate} />
+      )}
     </div>
   );
 }
