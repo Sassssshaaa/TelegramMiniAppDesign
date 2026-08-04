@@ -158,7 +158,6 @@ function ProductCard({
       <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 4, zIndex: 2, flexWrap: "wrap" }}>
         {product.isNew && <Badge text="NEW" color="#7CFF5B" />}
         {isHot && <Badge text="🔥 ХИТ" color="#FF6B35" />}
-        {!isAvailable && <Badge text="Нет" color="#FF4D6D" />}
       </div>
 
       <div
@@ -369,7 +368,13 @@ function HomeScreen({
 
   const greeting = tgFirstName ? `Привет, ${tgFirstName}!` : "Привет!";
 
-  const displayed = products.filter((p) => {
+  // Сначала отсеиваем товары с нулевым или отсутствующим остатком
+  const availableProducts = products.filter((p) => {
+    const isAvailable = p.inStock && (p.stock === undefined || p.stock > 0);
+    return isAvailable;
+  });
+
+  const displayed = availableProducts.filter((p) => {
     if (search.trim()) {
       const q = search.toLowerCase().trim();
       return p.name?.toLowerCase().includes(q) || p.brand?.toLowerCase().includes(q);
@@ -388,7 +393,7 @@ function HomeScreen({
     }
 
     const isHotProduct = p.isHot || p.ishot || p.is_hot;
-    const hasAnyHot = products.some((prod) => prod.isHot || prod.ishot || prod.is_hot);
+    const hasAnyHot = availableProducts.some((prod) => prod.isHot || prod.ishot || prod.is_hot);
     return hasAnyHot ? Boolean(isHotProduct) : true;
   });
 
@@ -499,19 +504,19 @@ function HomeScreen({
                     cursor: "pointer",
                     textAlign: "center",
                   }}
-              >
-                {brandName}
-              </button>
-            );
-          })}
-        </div>
+                >
+                  {brandName}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div style={{ marginBottom: 8 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
             <div style={{ fontSize: 17, fontWeight: 700 }}>
               {search ? `Результаты: «${search}»` : activeBrand ? `Бренд: ${activeBrand}` : activeCategory ? activeCategory : "🔥 Популярные вкусы"}
-          </div>
+            </div>
           </div>
 
           {loading ? (
@@ -525,7 +530,7 @@ function HomeScreen({
           )}
         </div>
       </div>
-  </div>
+    </div>
   );
 }
 
@@ -542,7 +547,13 @@ function CatalogScreen({
 }) {
   const [search, setSearch] = useState("");
 
-  const filtered = products.filter((p) => {
+  // Скрываем товары с нулевым остатком и здесь
+  const availableProducts = products.filter((p) => {
+    const isAvailable = p.inStock && (p.stock === undefined || p.stock > 0);
+    return isAvailable;
+  });
+
+  const filtered = availableProducts.filter((p) => {
     if (
       search &&
       !p.name?.toLowerCase().includes(search.toLowerCase()) &&
@@ -605,6 +616,7 @@ function ProductScreen({
   onAddCart: (p: Product, qty: number) => void;
 }) {
   const [qty, setQty] = useState(1);
+  const isAvailable = product.inStock && (product.stock === undefined || product.stock > 0);
 
   return (
     <div style={{ paddingBottom: 140 }}>
@@ -654,8 +666,15 @@ function ProductScreen({
       </div>
 
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 105px", background: "#0F1115", zIndex: 90 }}>
-        <button className="btn-primary" style={{ width: "100%", padding: "16px 0", fontSize: 16 }} onClick={() => onAddCart(product, qty)}>
-          Добавить {product.price * qty} Kč
+        <button 
+          className="btn-primary" 
+          style={{ width: "100%", padding: "16px 0", fontSize: 16, opacity: isAvailable ? 1 : 0.4 }} 
+          disabled={!isAvailable}
+          onClick={() => {
+            if (isAvailable) onAddCart(product, qty);
+          }}
+        >
+          {isAvailable ? `Добавить ${product.price * qty} Kč` : "Нет в наличии"}
         </button>
       </div>
     </div>
@@ -919,7 +938,7 @@ export default function App() {
         }
       } catch (err) {
         console.error("Ошибка запроса:", err);
-      } finally {
+      }finally {
         setLoading(false);
       }
     }
@@ -990,7 +1009,7 @@ export default function App() {
       )}
 
       {screen === "product" && selectedProduct && (
-        <ProductScreen
+        <ProductCardChecker
           product={selectedProduct}
           onBack={() => navigate(prevScreen)}
           onAddCart={(p, q) => {
