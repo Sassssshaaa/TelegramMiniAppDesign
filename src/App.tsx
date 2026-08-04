@@ -203,7 +203,7 @@ function ProductCard({
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <div style={{ fontSize: 17, fontWeight: 800, color: "#7CFF5B" }}>{product.price} грн</div>
+          <div style={{ fontSize: 17, fontWeight: 800, color: "#7CFF5B" }}>{product.price} Kč</div>
           {product.stock !== undefined && (
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>Остаток: {product.stock} шт.</div>
           )}
@@ -382,29 +382,9 @@ function HomeScreen({
 
   return (
     <div style={{ paddingBottom: 110 }}>
-      {/* ПЛАШКА О ВАЛЮТЕ (ГРН) */}
       <div
         style={{
-          margin: "12px 16px 0 16px",
-          background: "rgba(124, 255, 91, 0.1)",
-          border: "1px solid rgba(124, 255, 91, 0.3)",
-          borderRadius: 12,
-          padding: "8px 12px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          fontSize: 12,
-          color: "#7CFF5B",
-          fontWeight: 600,
-        }}
-      >
-        <span>💳 Оплата в гривнах (грн)</span>
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>UA Store</span>
-      </div>
-
-      <div
-        style={{
-          padding: "20px 20px 20px",
+          padding: "56px 20px 20px",
           background: "linear-gradient(180deg, rgba(124,255,91,0.07) 0%, transparent 100%)",
         }}
       >
@@ -633,7 +613,7 @@ function ProductScreen({
 
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 105px", background: "#0F1115", zIndex: 90 }}>
         <button className="btn-primary" style={{ width: "100%", padding: "16px 0", fontSize: 16 }} onClick={() => onAddCart(product, qty)}>
-          Добавить {product.price * qty} грн
+          Добавить {product.price * qty} Kč
         </button>
       </div>
     </div>
@@ -671,7 +651,7 @@ function CartScreen({
             <img src={item.product.img} alt={item.product.name} style={{ width: 60, height: 60, objectFit: "contain" }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 14, fontWeight: 700 }}>{item.product.name}</div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: "#7CFF5B" }}>{item.product.price * item.qty} грн</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "#7CFF5B" }}>{item.product.price * item.qty} Kč</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <button onClick={() => (item.qty === 1 ? onRemove(item.product.id) : onUpdateQty(item.product.id, item.qty - 1))} style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.1)", border: "none", color: "#fff" }}>-</button>
@@ -684,7 +664,7 @@ function CartScreen({
 
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 105px", background: "#0F1115", zIndex: 90 }}>
         <button className="btn-primary" style={{ width: "100%", padding: "17px 0", fontSize: 16 }} onClick={onCheckout}>
-          Оформить ({total} грн)
+          Оформить ({total} Kč)
         </button>
       </div>
     </div>
@@ -708,12 +688,12 @@ function CheckoutScreen({
   const [address, setAddress] = useState("");
 
   const itemsTotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
-  const deliveryFee = deliveryType === "delivery" ? 100 : 0;
+  const deliveryFee = deliveryType === "delivery" ? 79 : 0;
   const total = itemsTotal + deliveryFee;
 
   const handleConfirm = () => {
-    const deliveryStr = deliveryType === "delivery" ? `Доставка +100 грн (Адрес: ${address || "не указан"})` : "Самовывоз";
-    const paymentStr = payment === "cash" ? "Наличные (грн)" : "Криптовалюта / Перевод (грн)";
+    const deliveryStr = deliveryType === "delivery" ? `Доставка +79 Kč (Адрес: ${address || "не указан"})` : "Самовывоз (в округах Ostrava)";
+    const paymentStr = deliveryType === "delivery" ? "Криптовалюта (USDT)" : (payment === "cash" ? "Наличные" : "Криптовалюта (USDT)");
 
     if (typeof sendTelegramOrder === "function") {
       sendTelegramOrder(cart, total, {
@@ -740,13 +720,14 @@ function CheckoutScreen({
         <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>СПОСОБ ПОЛУЧЕНИЯ</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           {[
-            { id: "delivery", label: "Доставка", sub: "+ 100 грн" },
-            { id: "pickup", label: "Самовывоз", sub: "Бесплатно" },
+            { id: "delivery", label: "Доставка", sub: "+ 79 Kč" },
+            { id: "pickup", label: "Самовывоз", sub: "в округах Ostrava" },
           ].map((opt) => (
             <button
               key={opt.id}
               onClick={() => {
                 setDeliveryType(opt.id as "delivery" | "pickup");
+                if (opt.id === "delivery") setPayment("crypto");
               }}
               style={{
                 padding: "12px 10px",
@@ -772,7 +753,7 @@ function CheckoutScreen({
           <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>АДРЕС ДОСТАВКИ</div>
           <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px", display: "flex", alignItems: "center", gap: 10 }}>
             <MapPin size={16} color="rgba(255,255,255,0.35)" />
-            <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Город, отделение почты / адрес..." style={{ flex: 1, background: "none", border: "none", color: "#fff", padding: "14px 0" }} />
+            <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Улица, дом, квартира..." style={{ flex: 1, background: "none", border: "none", color: "#fff", padding: "14px 0" }} />
           </div>
         </div>
       )}
@@ -785,12 +766,15 @@ function CheckoutScreen({
       </div>
 
       <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>СПОСОБ ОПЛАТЫ (В ГРИВНАХ)</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>СПОСОБ ОПЛАТЫ</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {[
-            { id: "crypto", label: "Перевод / Оплата", sub: "В гривнах (грн)", icon: Zap },
-            { id: "cash", label: "Наличные", sub: "При получении (грн)", icon: Wallet },
-          ].map((opt) => {
+          {(deliveryType === "delivery" 
+            ? [{ id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap }]
+            : [
+                { id: "cash", label: "Наличные", sub: "При получении", icon: Wallet },
+                { id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap },
+              ]
+          ).map((opt) => {
             const Icon = opt.icon;
             return (
               <button
@@ -820,7 +804,7 @@ function CheckoutScreen({
 
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 105px", background: "#0F1115", zIndex: 90 }}>
         <button className="btn-primary" style={{ width: "100%", padding: "17px 0", fontSize: 16 }} onClick={handleConfirm}>
-          Отправить заказ ({total} грн)
+          Отправить заказ ({total} Kč)
         </button>
       </div>
     </div>
@@ -852,6 +836,7 @@ export default function App() {
 
   const { firstName, username, id: telegramId } = getTelegramUser();
 
+  // Автоматическое сохранение пользователя в таблицу users в Supabase
   useEffect(() => {
     async function saveUser() {
       if (!telegramId) return;
@@ -980,17 +965,9 @@ export default function App() {
           }}
         />
       )}
-      {screen === "success" && (
-        <SuccessScreen
-          onHome={() => {
-            navigate("home");
-          }}
-        />
-      )}
+      {screen === "success" && <SuccessScreen onHome={() => navigate("home")} />}
 
-      {["home", "catalog", "cart"].includes(screen) && (
-        <BottomNav current={screen} cartCount={cartCount} onNav={navigate} />
-      )}
+      {screen !== "success" && <BottomNav current={screen} cartCount={cartCount} onNav={navigate} />}
     </div>
   );
 }
