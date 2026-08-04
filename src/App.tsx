@@ -696,7 +696,7 @@ function CheckoutScreen({
     const deliveryStr = deliveryType === "delivery" ? `Доставка +79 Kč (Адрес: ${address || "не указан"})` : "Самовывоз (в округах Ostrava)";
     let paymentStr = "Криптовалюта (USDT)";
     if (deliveryType === "delivery") {
-      if (payment === "card") paymentStr = "Оплата ₴ на карту 🇺🇦 только UA";
+      if (payment === "card") paymentStr = "Оплата ₴ на карту 🇺🇦";
       else paymentStr = "Криптовалюта (USDT)";
     } else {
       if (payment === "cash") paymentStr = "Наличные";
@@ -779,7 +779,7 @@ function CheckoutScreen({
           {(deliveryType === "delivery" 
             ? [
                 { id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap },
-                { id: "card", label: "Оплата ₴ на карту 🇺🇦 только UA", sub: "Украинская карта", icon: CreditCard }
+                { id: "card", label: "Оплата ₴ на карту 🇺🇦", sub: "Украинская карта", icon: CreditCard }
               ]
             : [
                 { id: "cash", label: "Наличные", sub: "При получении", icon: Wallet },
