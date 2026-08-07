@@ -632,16 +632,18 @@ function ProductScreen({
           onClick={onBack}
           style={{
             position: "absolute",
-            top: 52,
+            top: 96, // Кнопка смещена ниже, чтобы не перекрываться с системной кнопкой Telegram
             left: 16,
             width: 42,
             height: 42,
             borderRadius: 14,
-            background: "rgba(15,17,21,0.7)",
+            background: "rgba(15,17,21,0.85)",
             border: "1px solid rgba(255,255,255,0.15)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            cursor: "pointer",
+            zIndex: 10,
           }}
         >
           <ChevronLeft size={20} color="#fff" />
@@ -655,9 +657,9 @@ function ProductScreen({
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div style={{ fontSize: 15, fontWeight: 700 }}>Количество</div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <button onClick={() => setQty(Math.max(1, qty - 1))} style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(255,255,255,0.08)", border: "none", color: "#fff" }}>-</button>
+            <button onClick={() => setQty(Math.max(1, qty - 1))} style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(255,255,255,0.08)", border: "none", color: "#fff", cursor: "pointer" }}>-</button>
             <span style={{ fontSize: 20, fontWeight: 700 }}>{qty}</span>
-            <button onClick={() => setQty(qty + 1)} style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(124,255,91,0.15)", border: "none", color: "#7CFF5B" }}>+</button>
+            <button onClick={() => setQty(qty + 1)} style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(124,255,91,0.15)", border: "none", color: "#7CFF5B", cursor: "pointer" }}>+</button>
           </div>
         </div>
       </div>
