@@ -368,7 +368,6 @@ function HomeScreen({
 
   const greeting = tgFirstName ? `Привет, ${tgFirstName}!` : "Привет!";
 
-  // Сначала отсеиваем товары с нулевым или отсутствующим остатком
   const availableProducts = products.filter((p) => {
     const isAvailable = p.inStock && (p.stock === undefined || p.stock > 0);
     return isAvailable;
@@ -482,7 +481,6 @@ function HomeScreen({
           </div>
         </div>
 
-        {/* Бренды (ElfliQ и Chaser) */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 14 }}>Бренды</div>
           <div style={{ display: "flex", gap: 10 }}>
@@ -547,7 +545,6 @@ function CatalogScreen({
 }) {
   const [search, setSearch] = useState("");
 
-  // Скрываем товары с нулевым остатком и здесь
   const availableProducts = products.filter((p) => {
     const isAvailable = p.inStock && (p.stock === undefined || p.stock > 0);
     return isAvailable;
@@ -938,7 +935,7 @@ export default function App() {
         }
       } catch (err) {
         console.error("Ошибка запроса:", err);
-      }finally {
+      } finally {
         setLoading(false);
       }
     }
@@ -1009,7 +1006,7 @@ export default function App() {
       )}
 
       {screen === "product" && selectedProduct && (
-        <ProductCardChecker
+        <ProductScreen
           product={selectedProduct}
           onBack={() => navigate(prevScreen)}
           onAddCart={(p, q) => {
