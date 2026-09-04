@@ -23,7 +23,6 @@ import {
   Zap,
   Phone,
   User,
-  Package,
 } from "lucide-react";
 
 declare global {
@@ -706,7 +705,7 @@ function CartScreen({
   }
 
   return (
-    <div style={{ paddingBottom: 140, padding: "56px 20px 0" }}>
+    <div style={{ paddingBottom: 180, padding: "56px 20px 0" }}>
       <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 20 }}>Корзина</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
         {cart.map((item) => (
@@ -717,16 +716,16 @@ function CartScreen({
               <div style={{ fontSize: 14, fontWeight: 800, color: "#7CFF5B" }}>{item.product.price * item.qty} Kč</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <button onClick={() => (item.qty === 1 ? onRemove(item.product.id) : onUpdateQty(item.product.id, item.qty - 1))} style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.1)", border: "none", color: "#fff" }}>-</button>
+              <button onClick={() => (item.qty === 1 ? onRemove(item.product.id) : onUpdateQty(item.product.id, item.qty - 1))} style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", cursor: "pointer" }}>-</button>
               <span>{item.qty}</span>
-              <button onClick={() => onUpdateQty(item.product.id, item.qty + 1)} style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(124,255,91,0.2)", border: "none", color: "#7CFF5B" }}>+</button>
+              <button onClick={() => onUpdateQty(item.product.id, item.qty + 1)} style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(124,255,91,0.2)", border: "none", color: "#7CFF5B", cursor: "pointer" }}>+</button>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="bottom-fixed-bar">
-        <button className="btn-primary" style={{ width: "100%", padding: "17px 0", fontSize: 16 }} onClick={onCheckout}>
+      <div className="bottom-fixed-cart">
+        <button className="btn-primary" style={{ width: "100%", padding: "16px 0", fontSize: 16 }} onClick={onCheckout}>
           Оформить ({total} Kč)
         </button>
       </div>
@@ -749,7 +748,6 @@ function CheckoutScreen({
   const [payment, setPayment] = useState<"crypto" | "card" | "cash">("crypto");
   const [tg, setTg] = useState(tgUsername ? `@${tgUsername}` : "");
   
-  // Данные для отправки / почты
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -834,7 +832,6 @@ function CheckoutScreen({
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>ДАННЫЕ ДЛЯ ДОСТАВКИ / ПОЧТЫ</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {/* ФИО */}
             <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px", display: "flex", alignItems: "center", gap: 10, border: "1px solid rgba(255,255,255,0.08)" }}>
               <User size={16} color="rgba(255,255,255,0.35)" />
               <input 
@@ -845,7 +842,6 @@ function CheckoutScreen({
               />
             </div>
 
-            {/* Телефон */}
             <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px", display: "flex", alignItems: "center", gap: 10, border: "1px solid rgba(255,255,255,0.08)" }}>
               <Phone size={16} color="rgba(255,255,255,0.35)" />
               <input 
@@ -857,7 +853,6 @@ function CheckoutScreen({
               />
             </div>
 
-            {/* Адрес / почта */}
             <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px", display: "flex", alignItems: "center", gap: 10, border: "1px solid rgba(255,255,255,0.08)" }}>
               <MapPin size={16} color="rgba(255,255,255,0.35)" />
               <input 
@@ -910,7 +905,7 @@ function CheckoutScreen({
               >
                 <Icon size={20} color={payment === opt.id ? "#7CFF5B" : "rgba(255,255,255,0.4)"} />
                 <div>
-                  <div style={{ fontSize: opt.id === "card" ? 15 : 15, fontWeight: opt.id === "card" ? 700 : 600, color: payment === opt.id ? "#7CFF5B" : "#fff" }}>{opt.label}</div>
+                  <div style={{ fontSize: 15, fontWeight: opt.id === "card" ? 700 : 600, color: payment === opt.id ? "#7CFF5B" : "#fff" }}>{opt.label}</div>
                   <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>{opt.sub}</div>
                 </div>
               </button>
