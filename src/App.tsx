@@ -402,7 +402,7 @@ function HomeScreen({
     <div style={{ paddingBottom: 120 }}>
       <div
         style={{
-          padding: "56px 20px 20px",
+          padding: "calc(env(safe-area-inset-top, 0px) + 80px) 20px 20px",
           background: "linear-gradient(180deg, rgba(124,255,91,0.07) 0%, transparent 100%)",
         }}
       >
@@ -564,7 +564,7 @@ function CatalogScreen({
 
   return (
     <div style={{ paddingBottom: 120 }}>
-      <div style={{ padding: "56px 20px 16px" }}>
+      <div style={{ padding: "calc(env(safe-area-inset-top, 0px) + 80px) 20px 16px" }}>
         <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 16 }}>Каталог</div>
         <div style={{ display: "flex", gap: 10 }}>
           <div
@@ -627,6 +627,7 @@ function ProductScreen({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          paddingTop: "env(safe-area-inset-top, 0px)",
         }}
       >
         <img src={product.img} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "16px" }} />
@@ -634,7 +635,7 @@ function ProductScreen({
           onClick={onBack}
           style={{
             position: "absolute",
-            top: 52,
+            top: "calc(env(safe-area-inset-top, 0px) + 20px)",
             left: 16,
             width: 42,
             height: 42,
@@ -705,7 +706,7 @@ function CartScreen({
   }
 
   return (
-    <div style={{ paddingBottom: 180, padding: "56px 20px 0" }}>
+    <div style={{ paddingBottom: 180, padding: "calc(env(safe-area-inset-top, 0px) + 80px) 20px 0" }}>
       <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 20 }}>Корзина</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
         {cart.map((item) => (
@@ -787,7 +788,7 @@ function CheckoutScreen({
   };
 
   return (
-    <div style={{ paddingBottom: 170, padding: "56px 20px 0" }}>
+    <div style={{ paddingBottom: 220, padding: "calc(env(safe-area-inset-top, 0px) + 80px) 20px 0" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
         <button onClick={onBack} style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(255,255,255,0.07)", border: "none", cursor: "pointer" }}>
           <ChevronLeft size={18} color="#fff" />
