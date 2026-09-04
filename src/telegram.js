@@ -5,7 +5,7 @@ export async function sendTelegramOrder(cart, total, customerData) {
   const user = tg?.initDataUnsafe?.user || {};
   const username = user.username ? `@${user.username}` : 'без username';
 
-  // Токен твоего бота и твой Chat ID
+  // Токен бота и Chat ID
   const BOT_TOKEN = "8800322131:AAGyDmhejJga0F65FobakauJdTcRE_8KPnw";
   const ADMIN_CHAT_ID = "8461436945";
 
@@ -22,11 +22,14 @@ export async function sendTelegramOrder(cart, total, customerData) {
   const message = `
 🚨 <b>НОВЫЙ ЗАКАЗ!</b>
 
-👤 <b>Покупатель:</b> ${customerData.name || user.first_name || 'Не указан'} (${username})
-🚚 <b>Доставка:</b> ${customerData.address || 'Не указан'}
-💳 <b>Оплата:</b> ${customerData.payment || 'Не указано'}
+👤 <b>Телеграм профиль:</b> ${customerData.name || user.first_name || 'Не указан'} (${username})
+📞 <b>Телефон:</b> ${customerData.phone || 'Не указан'}
+📍 <b>Детали доставки:</b>
+${customerData.address || 'Не указан'}
 
-📦 <b>Товары:</b>
+💳 <b>Способ оплаты:</b> ${customerData.payment || 'Не указан'}
+
+📦 <b>Состав заказа:</b>
 ${itemsList}
 
 💰 <b>Итого к оплате:</b> ${total} Kč
