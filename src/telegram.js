@@ -6,8 +6,8 @@ export async function sendTelegramOrder(cart, total, customerData) {
   const username = user.username ? `@${user.username}` : 'без username';
 
   // Токен бота и Chat ID
-  const BOT_TOKEN = "880032312312jJga012465FobakauJdTcRE_8KPnЫ";
-  const ADMIN_CHAT_ID = "8461412445";
+  const BOT_TOKEN = "8800322131:AAGyDmhejJga0F65FobakauJdTcRE_8KPnw";
+  const ADMIN_CHAT_ID = "8461436945";
 
   // Собираем товары
   const itemsList = cart
