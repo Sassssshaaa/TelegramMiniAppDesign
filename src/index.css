@@ -52,7 +52,7 @@ html, body {
 .neon-green { color: #7CFF5B; }
 .neon-blue { color: #4DA6FF; }
 
-/* Нижний фиксированный блок с учетом Safe Area из Telegram */
+/* Фиксированная кнопка снизу (для экранов без навигации) */
 .bottom-fixed-bar {
   position: fixed;
   bottom: 0;
@@ -61,11 +61,27 @@ html, body {
   max-width: 390px;
   margin: 0 auto;
   padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 12px));
-  background: rgba(15, 17, 21, 0.95);
+  background: rgba(15, 17, 21, 0.98);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  z-index: 100;
+  z-index: 1000;
+}
+
+/* Фиксированная кнопка над нижней навигацией (для Корзины) */
+.bottom-fixed-cart {
+  position: fixed;
+  bottom: calc(65px + env(safe-area-inset-bottom, 12px));
+  left: 0;
+  right: 0;
+  max-width: 390px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  background: rgba(15, 17, 21, 0.98);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 90;
 }
 
 @keyframes fadeIn {
