@@ -782,118 +782,120 @@ function CheckoutScreen({
   };
 
   return (
-    <div style={{ paddingBottom: 160, padding: "56px 20px 0" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-        <button onClick={onBack} style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(255,255,255,0.07)", border: "none" }}>
-          <ChevronLeft size={18} color="#fff" />
-        </button>
-        <div style={{ fontSize: 22, fontWeight: 800 }}>Оформление</div>
-      </div>
-
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>СПОСОБ ПОЛУЧЕНИЯ</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {[
-            { id: "delivery", label: "Доставка", sub: "+ 79 Kč" },
-            { id: "pickup", label: "Самовывоз", sub: "в округах Ostrava" },
-          ].map((opt) => (
-            <button
-              key={opt.id}
-              onClick={() => {
-                setDeliveryType(opt.id as "delivery" | "pickup");
-                if (opt.id === "pickup" && payment === "card") setPayment("crypto");
-              }}
-              style={{
-                padding: "12px 10px",
-                borderRadius: 14,
-                background: deliveryType === opt.id ? "rgba(124,255,91,0.12)" : "rgba(255,255,255,0.05)",
-                border: deliveryType === opt.id ? "1.5px solid #7CFF5B" : "1px solid rgba(255,255,255,0.08)",
-                color: deliveryType === opt.id ? "#7CFF5B" : "#fff",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              <span style={{ fontSize: 14, fontWeight: 700 }}>{opt.id === "delivery" ? "🛵 Доставка / Почта" : "🏪 Самовывоз"}</span>
-              <span style={{ fontSize: 10, color: deliveryType === opt.id ? "rgba(124,255,91,0.8)" : "rgba(255,255,255,0.4)" }}>{opt.sub}</span>
-            </button>
-          ))}
+    <div style={{ height: "100vh", display: "flex", flexDirection: "column", position: "relative" }}>
+      {/* Автономная прокручиваемая область */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "56px 20px 240px", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+          <button onClick={onBack} style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(255,255,255,0.07)", border: "none", cursor: "pointer" }}>
+            <ChevronLeft size={18} color="#fff" />
+          </button>
+          <div style={{ fontSize: 22, fontWeight: 800 }}>Оформление</div>
         </div>
-      </div>
 
-      {deliveryType === "delivery" && (
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>ДАННЫЕ ДЛЯ ДОСТАВКИ / ПОЧТЫ</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {/* ФИО */}
-            <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px", display: "flex", alignItems: "center", gap: 10 }}>
-              <User size={16} color="rgba(255,255,255,0.35)" />
-              <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="ФИО получателя (для почты)" style={{ flex: 1, background: "none", border: "none", color: "#fff", padding: "14px 0", outline: "none" }} />
-            </div>
-            {/* Телефон */}
-            <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px", display: "flex", alignItems: "center", gap: 10 }}>
-              <Phone size={16} color="rgba(255,255,255,0.35)" />
-              <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Номер телефона (+420...)" style={{ flex: 1, background: "none", border: "none", color: "#fff", padding: "14px 0", outline: "none" }} />
-            </div>
-            {/* Адрес */}
-            <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px", display: "flex", alignItems: "center", gap: 10 }}>
-              <MapPin size={16} color="rgba(255,255,255,0.35)" />
-              <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Улица, дом, квартира / № отделения почты" style={{ flex: 1, background: "none", border: "none", color: "#fff", padding: "14px 0", outline: "none" }} />
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>TELEGRAM ДЛЯ СВЯЗИ</div>
-        <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px" }}>
-          <input value={tg} onChange={(e) => setTg(e.target.value)} placeholder="@username" style={{ width: "100%", background: "none", border: "none", color: "#fff", padding: "14px 0", outline: "none" }} />
-        </div>
-      </div>
-
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>СПОСОБ ОПЛАТЫ</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {(deliveryType === "delivery" 
-            ? [
-                { id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap },
-                { id: "card", label: "Оплата на карту 🇺🇦", sub: "Украинская карта", icon: CreditCard }
-              ]
-            : [
-                { id: "cash", label: "Наличные", sub: "При получении", icon: Wallet },
-                { id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap },
-              ]
-          ).map((opt) => {
-            const Icon = opt.icon;
-            return (
+          <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>СПОСОБ ПОЛУЧЕНИЯ</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {[
+              { id: "delivery", label: "Доставка", sub: "+ 79 Kč" },
+              { id: "pickup", label: "Самовывоз", sub: "в округах Ostrava" },
+            ].map((opt) => (
               <button
                 key={opt.id}
-                onClick={() => setPayment(opt.id as "cash" | "crypto" | "card")}
+                onClick={() => {
+                  setDeliveryType(opt.id as "delivery" | "pickup");
+                  if (opt.id === "pickup" && payment === "card") setPayment("crypto");
+                }}
                 style={{
-                  padding: "14px 16px",
+                  padding: "12px 10px",
                   borderRadius: 14,
-                  background: payment === opt.id ? "rgba(124,255,91,0.1)" : "rgba(255,255,255,0.05)",
-                  border: payment === opt.id ? "1.5px solid #7CFF5B" : "1px solid rgba(255,255,255,0.08)",
+                  background: deliveryType === opt.id ? "rgba(124,255,91,0.12)" : "rgba(255,255,255,0.05)",
+                  border: deliveryType === opt.id ? "1.5px solid #7CFF5B" : "1px solid rgba(255,255,255,0.08)",
+                  color: deliveryType === opt.id ? "#7CFF5B" : "#fff",
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
-                  gap: 14,
-                  textAlign: "left",
+                  gap: 2,
+                  cursor: "pointer",
                 }}
               >
-                <Icon size={20} color={payment === opt.id ? "#7CFF5B" : "rgba(255,255,255,0.4)"} />
-                <div>
-                  <div style={{ fontSize: opt.id === "card" ? 16 : 15, fontWeight: opt.id === "card" ? 700 : 600, color: payment === opt.id ? "#7CFF5B" : "#fff" }}>{opt.label}</div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>{opt.sub}</div>
-                </div>
+                <span style={{ fontSize: 14, fontWeight: 700 }}>{opt.id === "delivery" ? "🛵 Доставка / Почта" : "🏪 Самовывоз"}</span>
+                <span style={{ fontSize: 10, color: deliveryType === opt.id ? "rgba(124,255,91,0.8)" : "rgba(255,255,255,0.4)" }}>{opt.sub}</span>
               </button>
-            );
-          })}
+            ))}
+          </div>
+        </div>
+
+        {deliveryType === "delivery" && (
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>ДАННЫЕ ДЛЯ ДОСТАВКИ / ПОЧТЫ</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px", display: "flex", alignItems: "center", gap: 10 }}>
+                <User size={16} color="rgba(255,255,255,0.35)" />
+                <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="ФИО получателя (для почты)" style={{ flex: 1, background: "none", border: "none", color: "#fff", padding: "14px 0", outline: "none" }} />
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px", display: "flex", alignItems: "center", gap: 10 }}>
+                <Phone size={16} color="rgba(255,255,255,0.35)" />
+                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Номер телефона (+420...)" style={{ flex: 1, background: "none", border: "none", color: "#fff", padding: "14px 0", outline: "none" }} />
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px", display: "flex", alignItems: "center", gap: 10 }}>
+                <MapPin size={16} color="rgba(255,255,255,0.35)" />
+                <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Улица, дом, квартира / № отделения" style={{ flex: 1, background: "none", border: "none", color: "#fff", padding: "14px 0", outline: "none" }} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>TELEGRAM ДЛЯ СВЯЗИ</div>
+          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "0 14px" }}>
+            <input value={tg} onChange={(e) => setTg(e.target.value)} placeholder="@username" style={{ width: "100%", background: "none", border: "none", color: "#fff", padding: "14px 0", outline: "none" }} />
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>СПОСОБ ОПЛАТЫ</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {(deliveryType === "delivery" 
+              ? [
+                  { id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap },
+                  { id: "card", label: "Оплата на карту 🇺🇦", sub: "Украинская карта", icon: CreditCard }
+                ]
+              : [
+                  { id: "cash", label: "Наличные", sub: "При получении", icon: Wallet },
+                  { id: "crypto", label: "Криптовалюта", sub: "USDT", icon: Zap },
+                ]
+            ).map((opt) => {
+              const Icon = opt.icon;
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => setPayment(opt.id as "cash" | "crypto" | "card")}
+                  style={{
+                    padding: "14px 16px",
+                    borderRadius: 14,
+                    background: payment === opt.id ? "rgba(124,255,91,0.1)" : "rgba(255,255,255,0.05)",
+                    border: payment === opt.id ? "1.5px solid #7CFF5B" : "1px solid rgba(255,255,255,0.08)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Icon size={20} color={payment === opt.id ? "#7CFF5B" : "rgba(255,255,255,0.4)"} />
+                  <div>
+                    <div style={{ fontSize: opt.id === "card" ? 16 : 15, fontWeight: opt.id === "card" ? 700 : 600, color: payment === opt.id ? "#7CFF5B" : "#fff" }}>{opt.label}</div>
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>{opt.sub}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Фиксированная кнопка внизу с уменьшенным paddingBottom, чтобы она не была огромной */}
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 32px", background: "#0F1115", zIndex: 90 }}>
+      {/* Зафиксированная кнопка снизу */}
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 24px", background: "#0F1115", zIndex: 100, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
         <button className="btn-primary" style={{ width: "100%", padding: "17px 0", fontSize: 16 }} onClick={handleConfirm}>
           Отправить заказ ({total} Kč)
         </button>
@@ -1005,7 +1007,7 @@ export default function App() {
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
   return (
-    <div style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#0F1115", position: "relative" }}>
+    <div style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", height: "100vh", overflowY: "auto", background: "#0F1115", position: "relative" }}>
       {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
 
       {screen === "home" && (
