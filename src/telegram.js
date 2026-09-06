@@ -6,7 +6,7 @@ export async function sendTelegramOrder(cart, total, customerData) {
   const username = user.username ? `@${user.username}` : 'без username';
 
   // Токен твоего бота и твой Chat ID
-  const BOT_TOKEN = "8800322131:AAEeQU71mdM65TZ_uyXthrvkXAuyyPDsBSMw";
+  const BOT_TOKEN = "8800322131:AAEeQU71mdM65TZ_uyXthrvkXAuyyPDsBSM";
   const ADMIN_CHAT_ID = "8461436945";
 
   // Собираем товары
@@ -33,7 +33,7 @@ ${itemsList}
   `;
 
   try {
-    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${8800322131:AAEeQU71mdM65TZ_uyXthrvkXAuyyPDsBSM}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
