@@ -783,7 +783,6 @@ function CheckoutScreen({
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", position: "relative" }}>
-      {/* Автономная прокручиваемая область */}
       <div style={{ flex: 1, overflowY: "auto", padding: "56px 20px 240px", WebkitOverflowScrolling: "touch" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
           <button onClick={onBack} style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(255,255,255,0.07)", border: "none", cursor: "pointer" }}>
@@ -894,7 +893,6 @@ function CheckoutScreen({
         </div>
       </div>
 
-      {/* Зафиксированная кнопка снизу */}
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 24px", background: "#0F1115", zIndex: 100, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
         <button className="btn-primary" style={{ width: "100%", padding: "17px 0", fontSize: 16 }} onClick={handleConfirm}>
           Отправить заказ ({total} Kč)
@@ -926,26 +924,35 @@ export default function App() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isBanned, setIsBanned] = useState(false);
 
   const { firstName, username, id: telegramId } = getTelegramUser();
 
   useEffect(() => {
-    async function saveUser() {
+    async function checkAndSaveUser() {
       if (!telegramId) return;
+
       try {
-        const { error } = await supabase
+        const { data: bannedData } = await supabase
+          .from("black_list")
+          .select("telegram_id")
+          .eq("telegram_id", telegramId)
+          .single();
+
+        if (bannedData) {
+          setIsBanned(true);
+          return;
+        }
+
+        await supabase
           .from("users")
           .upsert({ telegram_id: telegramId }, { onConflict: "telegram_id" });
-
-        if (error) {
-          console.error("Ошибка сохранения пользователя в базу:", error);
-        }
       } catch (err) {
-        console.error("Ошибка запроса при сохранении юзера:", err);
+        console.error("Ошибка проверки бана / сохранения юзера:", err);
       }
     }
 
-    saveUser();
+    checkAndSaveUser();
   }, [telegramId]);
 
   useEffect(() => {
@@ -1005,6 +1012,18 @@ export default function App() {
   };
 
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+
+  if (isBanned) {
+    return (
+      <div style={{ maxWidth: 390, margin: "0 auto", height: "100vh", background: "#0F1115", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center" }}>
+        <div style={{ fontSize: 60, marginBottom: 16 }}>🚫</div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: "#FF4D6D", marginBottom: 8 }}>Доступ ограничен</div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.6)" }}>
+          Ваш аккаунт заблокирован из-за нарушения правил использования магазина.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", height: "100vh", overflowY: "auto", background: "#0F1115", position: "relative" }}>
