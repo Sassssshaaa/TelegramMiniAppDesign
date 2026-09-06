@@ -43,11 +43,6 @@ declare global {
         ready?: () => void;
       };
     };
-    sendTelegramOrder?: (
-      cart: CartItem[],
-      total: number,
-      details: { name: string; phone: string; address: string; payment: string }
-    ) => void;
   }
 }
 
@@ -371,8 +366,7 @@ function HomeScreen({
   const greeting = tgFirstName ? `Привет, ${tgFirstName}!` : "Привет!";
 
   const availableProducts = products.filter((p) => {
-    const isAvailable = p.inStock && (p.stock === undefined || p.stock > 0);
-    return isAvailable;
+    return p.inStock && (p.stock === undefined || p.stock > 0);
   });
 
   const displayed = availableProducts.filter((p) => {
@@ -548,8 +542,7 @@ function CatalogScreen({
   const [search, setSearch] = useState("");
 
   const availableProducts = products.filter((p) => {
-    const isAvailable = p.inStock && (p.stock === undefined || p.stock > 0);
-    return isAvailable;
+    return p.inStock && (p.stock === undefined || p.stock > 0);
   });
 
   const filtered = availableProducts.filter((p) => {
@@ -769,14 +762,12 @@ function CheckoutScreen({
       else paymentStr = "Криптовалюта (USDT)";
     }
 
-    if (typeof sendTelegramOrder === "function") {
-      sendTelegramOrder(cart, total, {
-        name: tg || "Клиент",
-        phone: phone || "Не указан",
-        address: deliveryStr,
-        payment: paymentStr,
-      });
-    }
+    sendTelegramOrder(cart, total, {
+      name: tg || "Клиент",
+      phone: phone || "Не указан",
+      address: deliveryStr,
+      payment: paymentStr,
+    });
 
     onConfirm();
   };
