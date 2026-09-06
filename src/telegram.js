@@ -14,10 +14,10 @@ export const sendTelegramOrder = async (cart, total, details) => {
     `📦 *Состав заказа:*\n${itemsText}\n\n` +
     `💰 *Итого:* ${total} Kč`;
 
-  // Укажите логин менеджера без символа @
-  const managerUsername = "ВАШ_TELEGRAM_USERNAME";
+  // Укажите логин вашего аккаунта или менеджера БЕЗ символа @
+  const managerUsername = "Manager_cloud_Om";
 
-  const tgUrl = `https://t.me/${managerUsername}?text=${encodeURIComponent(text)}`;
+  const tgUrl = `https://t.me/${https://t.me/Manager_cloud_Om}?text=${encodeURIComponent(text)}`;
 
   if (window.Telegram?.WebApp?.openTelegramLink) {
     window.Telegram.WebApp.openTelegramLink(tgUrl);
