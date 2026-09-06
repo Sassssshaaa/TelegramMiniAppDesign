@@ -7,7 +7,7 @@ export async function sendTelegramOrder(cart, total, customerData) {
   const user = tg?.initDataUnsafe?.user || {};
   const username = user.username ? `@${user.username}` : 'без username';
 
-  const BOT_TOKEN = "8800322131:AAEeQU71mdM65TZ_uyXthrvkXAuyyPDsBSMw";
+  const BOT_TOKEN = "8998741342:AAEOztbKUu481zB7RAVYxi59yCJ2xJ7OFgE";
   const ADMIN_CHAT_ID = "8461436945";
 
   const itemsList = cart
