@@ -1,3 +1,5 @@
+// src/telegram.js
+
 export async function sendTelegramOrder(cart, total, customerData) {
   const tg = window.Telegram?.WebApp;
   tg?.expand();
@@ -5,11 +7,9 @@ export async function sendTelegramOrder(cart, total, customerData) {
   const user = tg?.initDataUnsafe?.user || {};
   const username = user.username ? `@${user.username}` : 'без username';
 
-  // Токен твоего бота и твой Chat ID
-  const BOT_TOKEN = "8800322131:AAEeQU71mdM65TZ_uyXthrvkXAuyyPDsBSM";
+  const BOT_TOKEN = "8800322131:AAEeQU71mdM65TZ_uyXthrvkXAuyyPDsBSMw";
   const ADMIN_CHAT_ID = "8461436945";
 
-  // Собираем товары
   const itemsList = cart
     .map(
       (item) =>
@@ -33,7 +33,7 @@ ${itemsList}
   `;
 
   try {
-    const res = await fetch(`https://api.telegram.org/bot${8800322131:AAEeQU71mdM65TZ_uyXthrvkXAuyyPDsBSM}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
