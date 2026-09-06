@@ -1,27 +1,50 @@
-// src/telegram.js
+export async function sendTelegramOrder(cart, total, customerData) {
+  const tg = window.Telegram?.WebApp;
+  tg?.expand();
 
-export const sendTelegramOrder = async (cart, total, details) => {
-  const itemsText = cart
-    .map((item) => `• ${item.product.name} x${item.qty} (${item.product.price * item.qty} Kč)`)
+  const user = tg?.initDataUnsafe?.user || {};
+  const username = user.username ? `@${user.username}` : 'без username';
+
+  const BOT_TOKEN = "8800322131:AAEeQU71mdM65TZ_uyXthrvkXAuyyPDsBSM";
+  const ADMIN_CHAT_ID = "8461436945";
+
+  // Собираем товары
+  const itemsList = cart
+    .map(
+      (item) =>
+        `• <b>${item.product.name}</b> (${item.product.volume || ''}) × ${item.qty} шт. = ${
+          item.product.price * item.qty
+        } Kč`
+    )
     .join("\n");
 
-  const text =
-    `🛒 *Новый заказ!*\n\n` +
-    `👤 *Клиент:* ${details.name}\n` +
-    `📞 *Телефон:* ${details.phone}\n` +
-    `📍 *Адрес:* ${details.address}\n` +
-    `💳 *Оплата:* ${details.payment}\n\n` +
-    `📦 *Состав заказа:*\n${itemsText}\n\n` +
-    `💰 *Итого:* ${total} Kč`;
+  const message = `
+🚨 <b>НОВЫЙ ЗАКАЗ!</b>
 
-  // Передаем ТОЛЬКО юзернейм без https://t.me/ и без @
-  const managerUsername = "Manager_cloud_Om";
+👤 <b>Покупатель:</b> ${customerData.name || user.first_name || 'Не указан'} (${username})
+🚚 <b>Доставка:</b> ${customerData.address || 'Не указан'}
+💳 <b>Оплата:</b> ${customerData.payment || 'Не указано'}
 
-  const tgUrl = `https://t.me/${managerUsername}?text=${encodeURIComponent(text)}`;
+📦 <b>Товары:</b>
+${itemsList}
 
-  if (window.Telegram?.WebApp?.openTelegramLink) {
-    window.Telegram.WebApp.openTelegramLink(tgUrl);
-  } else {
-    window.open(tgUrl, "_blank");
+💰 <b>Итого к оплате:</b> ${total} Kč
+  `;
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: ADMIN_CHAT_ID,
+        text: message,
+        parse_mode: 'HTML',
+      }),
+    });
+
+    return res.ok;
+  } catch (error) {
+    console.error("Ошибка при отправке заказа:", error);
+    return false;
   }
-};
+}
