@@ -1,12 +1,26 @@
-// telegram.ts
+export interface CartItem {
+  product: {
+    name: string;
+    price: number;
+  };
+  qty: number;
+}
+
+export interface OrderDetails {
+  name: string;
+  phone: string;
+  address: string;
+  payment: string;
+}
+
 export const sendTelegramOrder = async (
-  cart: any[],
+  cart: CartItem[],
   total: number,
-  details: { name: string; phone: string; address: string; payment: string }
-) => {
+  details: OrderDetails
+): Promise<void> => {
   const itemsText = cart
     .map((item) => `• ${item.product.name} x${item.qty} (${item.product.price * item.qty} Kč)`)
-    .join('\n');
+    .join("\n");
 
   const text =
     `🛒 *Новый заказ!*\n\n` +
@@ -17,8 +31,8 @@ export const sendTelegramOrder = async (
     `📦 *Состав заказа:*\n${itemsText}\n\n` +
     `💰 *Итого:* ${total} Kč`;
 
-  // Укажите юзернейм вашего аккаунта или менеджера БЕЗ символа @
-  const managerUsername = "ВАШ_TELEGRAM_USERNAME"; 
+  // Укажите логин менеджера или аккаунт без знака @
+  const managerUsername = "ВАШ_TELEGRAM_USERNAME";
 
   const tgUrl = `https://t.me/${managerUsername}?text=${encodeURIComponent(text)}`;
 
