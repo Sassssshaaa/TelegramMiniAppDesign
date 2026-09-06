@@ -762,7 +762,6 @@ function CheckoutScreen({
       else paymentStr = "Криптовалюта (USDT)";
     }
 
-    // Вызываем оригинальную отправку
     sendTelegramOrder(cart, total, {
       name: tg || "Клиент",
       phone: phone || "Не указан",
@@ -898,7 +897,7 @@ function SuccessScreen({ onHome }: { onHome: () => void }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "0 28px", textAlign: "center" }}>
       <CheckCircle size={60} color="#7CFF5B" style={{ marginBottom: 20 }} />
-      <div style={{ fontSize: 24, fontWeight: 900, marginBottom: 10 }}>Заказ оформлен!</div>
+      <div style={{ fontSize: 24, fontWeight: 900, marginBottom: 10 }}>Заказ отправлен!</div>
       <div style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 20 }}>Заказ сформирован и передан менеджеру.</div>
       <button className="btn-primary" style={{ width: "100%", padding: "16px 0" }} onClick={onHome}>
         Вернуться в магазин
