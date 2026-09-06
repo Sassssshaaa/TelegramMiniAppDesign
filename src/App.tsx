@@ -22,8 +22,7 @@ import {
   CreditCard,
   Zap,
   User,
-  Phone,
-  AlertCircle
+  Phone
 } from "lucide-react";
 
 declare global {
@@ -44,6 +43,11 @@ declare global {
         ready?: () => void;
       };
     };
+    sendTelegramOrder?: (
+      cart: CartItem[],
+      total: number,
+      details: { name: string; phone: string; address: string; payment: string }
+    ) => void;
   }
 }
 
@@ -235,9 +239,9 @@ function ProductCard({
   );
 }
 
-function Toast({ msg, isError = false, onDone }: { msg: string; isError?: boolean; onDone: () => void }) {
+function Toast({ msg, onDone }: { msg: string; onDone: () => void }) {
   useEffect(() => {
-    const t = setTimeout(onDone, 3000);
+    const t = setTimeout(onDone, 2500);
     return () => clearTimeout(t);
   }, [onDone]);
   return (
@@ -251,7 +255,7 @@ function Toast({ msg, isError = false, onDone }: { msg: string; isError?: boolea
         zIndex: 999,
         background: "rgba(20,23,28,0.95)",
         backdropFilter: "blur(20px)",
-        border: `1px solid ${isError ? "#FF4D6D" : "rgba(124,255,91,0.3)"}`,
+        border: "1px solid rgba(124,255,91,0.3)",
         borderRadius: 16,
         padding: "14px 18px",
         display: "flex",
@@ -259,7 +263,7 @@ function Toast({ msg, isError = false, onDone }: { msg: string; isError?: boolea
         gap: 10,
       }}
     >
-      {isError ? <AlertCircle size={18} color="#FF4D6D" /> : <CheckCircle size={18} color="#7CFF5B" />}
+      <CheckCircle size={18} color="#7CFF5B" />
       <span style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>{msg}</span>
     </div>
   );
@@ -367,7 +371,8 @@ function HomeScreen({
   const greeting = tgFirstName ? `Привет, ${tgFirstName}!` : "Привет!";
 
   const availableProducts = products.filter((p) => {
-    return p.inStock && (p.stock === undefined || p.stock > 0);
+    const isAvailable = p.inStock && (p.stock === undefined || p.stock > 0);
+    return isAvailable;
   });
 
   const displayed = availableProducts.filter((p) => {
@@ -543,7 +548,8 @@ function CatalogScreen({
   const [search, setSearch] = useState("");
 
   const availableProducts = products.filter((p) => {
-    return p.inStock && (p.stock === undefined || p.stock > 0);
+    const isAvailable = p.inStock && (p.stock === undefined || p.stock > 0);
+    return isAvailable;
   });
 
   const filtered = availableProducts.filter((p) => {
@@ -628,7 +634,7 @@ function ProductScreen({
           onClick={onBack}
           style={{
             position: "absolute",
-            top: 20, 
+            top: 96, 
             left: 16,
             width: 42,
             height: 42,
@@ -660,7 +666,7 @@ function ProductScreen({
         </div>
       </div>
 
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 30px", background: "#0F1115", zIndex: 90, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 105px", background: "#0F1115", zIndex: 90 }}>
         <button 
           className="btn-primary" 
           style={{ width: "100%", padding: "16px 0", fontSize: 16, opacity: isAvailable ? 1 : 0.4 }} 
@@ -710,15 +716,15 @@ function CartScreen({
               <div style={{ fontSize: 14, fontWeight: 800, color: "#7CFF5B" }}>{item.product.price * item.qty} Kč</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <button onClick={() => (item.qty === 1 ? onRemove(item.product.id) : onUpdateQty(item.product.id, item.qty - 1))} style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", cursor: "pointer" }}>-</button>
+              <button onClick={() => (item.qty === 1 ? onRemove(item.product.id) : onUpdateQty(item.product.id, item.qty - 1))} style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.1)", border: "none", color: "#fff" }}>-</button>
               <span>{item.qty}</span>
-              <button onClick={() => onUpdateQty(item.product.id, item.qty + 1)} style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(124,255,91,0.2)", border: "none", color: "#7CFF5B", cursor: "pointer" }}>+</button>
+              <button onClick={() => onUpdateQty(item.product.id, item.qty + 1)} style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(124,255,91,0.2)", border: "none", color: "#7CFF5B" }}>+</button>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 90px", background: "#0F1115", zIndex: 90 }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 105px", background: "#0F1115", zIndex: 90 }}>
         <button className="btn-primary" style={{ width: "100%", padding: "17px 0", fontSize: 16 }} onClick={onCheckout}>
           Оформить ({total} Kč)
         </button>
@@ -731,13 +737,11 @@ function CheckoutScreen({
   cart,
   tgUsername,
   onBack,
-  onError,
   onConfirm,
 }: {
   cart: CartItem[];
   tgUsername: string | null;
   onBack: () => void;
-  onError: (msg: string) => void;
   onConfirm: () => void;
 }) {
   const [deliveryType, setDeliveryType] = useState<"delivery" | "pickup">("delivery");
@@ -746,57 +750,41 @@ function CheckoutScreen({
   const [address, setAddress] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const itemsTotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
   const deliveryFee = deliveryType === "delivery" ? 79 : 0;
   const total = itemsTotal + deliveryFee;
 
-  const handleConfirm = async () => {
-    if (deliveryType === "delivery" && (!fullName.trim() || !phone.trim() || !address.trim())) {
-      onError("Заполните ФИО, телефон и адрес для доставки");
-      return;
-    }
-
-    if (!tg.trim()) {
-      onError("Укажите контактный Telegram");
-      return;
-    }
-
-    setIsSubmitting(true);
-
+  const handleConfirm = () => {
     const deliveryStr = deliveryType === "delivery" 
-      ? `Доставка (+79 Kč) — ФИО: ${fullName.trim()}, Телефон: ${phone.trim()}, Адрес: ${address.trim()}` 
+      ? `Доставка +79 Kč (ФИО: ${fullName || "не указан"}, Адрес: ${address || "не указан"})` 
       : "Самовывоз (в округах Ostrava)";
       
     let paymentStr = "Криптовалюта (USDT)";
     if (deliveryType === "delivery") {
-      paymentStr = payment === "card" ? "Оплата на карту 🇺🇦" : "Криптовалюта (USDT)";
+      if (payment === "card") paymentStr = "Оплата на карту 🇺🇦";
+      else paymentStr = "Криптовалюта (USDT)";
     } else {
-      paymentStr = payment === "cash" ? "Наличные" : "Криптовалюта (USDT)";
+      if (payment === "cash") paymentStr = "Наличные";
+      else paymentStr = "Криптовалюта (USDT)";
     }
 
-    try {
-      if (typeof sendTelegramOrder === "function") {
-        await sendTelegramOrder(cart, total, {
-          name: `${fullName.trim()} (${tg.trim()})`,
-          phone: phone.trim() || "Не указан",
-          address: deliveryStr,
-          payment: paymentStr,
-        });
-      }
-      onConfirm();
-    } catch (err) {
-      console.error("Ошибка при отправке заказа:", err);
-      onError("Сбой при отправке заказа. Попробуйте еще раз.");
-    } finally {
-      setIsSubmitting(false);
+    if (typeof sendTelegramOrder === "function") {
+      sendTelegramOrder(cart, total, {
+        name: tg || "Клиент",
+        phone: phone || "Не указан",
+        address: deliveryStr,
+        payment: paymentStr,
+      });
     }
+
+    onConfirm();
   };
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", position: "relative" }}>
-      <div style={{ flex: 1, overflowY: "auto", padding: "56px 20px 120px", WebkitOverflowScrolling: "touch" }}>
+      {/* Автономная прокручиваемая область */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "56px 20px 240px", WebkitOverflowScrolling: "touch" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
           <button onClick={onBack} style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(255,255,255,0.07)", border: "none", cursor: "pointer" }}>
             <ChevronLeft size={18} color="#fff" />
@@ -906,14 +894,10 @@ function CheckoutScreen({
         </div>
       </div>
 
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 24px", background: "#0F1115", zIndex: 110, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-        <button 
-          className="btn-primary" 
-          style={{ width: "100%", padding: "17px 0", fontSize: 16, opacity: isSubmitting ? 0.6 : 1 }} 
-          disabled={isSubmitting} 
-          onClick={handleConfirm}
-        >
-          {isSubmitting ? "Отправка..." : `Отправить заказ (${total} Kč)`}
+      {/* Зафиксированная кнопка снизу */}
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 390, margin: "0 auto", padding: "16px 20px 24px", background: "#0F1115", zIndex: 100, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+        <button className="btn-primary" style={{ width: "100%", padding: "17px 0", fontSize: 16 }} onClick={handleConfirm}>
+          Отправить заказ ({total} Kč)
         </button>
       </div>
     </div>
@@ -926,7 +910,7 @@ function SuccessScreen({ onHome }: { onHome: () => void }) {
       <CheckCircle size={60} color="#7CFF5B" style={{ marginBottom: 20 }} />
       <div style={{ fontSize: 24, fontWeight: 900, marginBottom: 10 }}>Переход в чат!</div>
       <div style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 20 }}>Заказ сформирован и передан менеджеру в диалог Telegram.</div>
-      <button className="btn-primary" style={{ width: "100%", padding: "16px 0", cursor: "pointer" }} onClick={onHome}>
+      <button className="btn-primary" style={{ width: "100%", padding: "16px 0" }} onClick={onHome}>
         Вернуться в магазин
       </button>
     </div>
@@ -938,7 +922,7 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [prevScreen, setPrevScreen] = useState<Screen>("home");
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [toast, setToast] = useState<{ msg: string; isError?: boolean } | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1004,7 +988,7 @@ export default function App() {
       }
       return [...prev, { product, qty }];
     });
-    setToast({ msg: `${product.name} добавлен в корзину` });
+    setToast(`${product.name} добавлен в корзину`);
   };
 
   const updateQty = (id: number, qty: number) => {
@@ -1024,7 +1008,7 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", height: "100vh", overflowY: "auto", background: "#0F1115", position: "relative" }}>
-      {toast && <Toast msg={toast.msg} isError={toast.isError} onDone={() => setToast(null)} />}
+      {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
 
       {screen === "home" && (
         <HomeScreen
@@ -1071,7 +1055,6 @@ export default function App() {
           cart={cart}
           tgUsername={username}
           onBack={() => navigate("cart")}
-          onError={(msg) => setToast({ msg, isError: true })}
           onConfirm={() => {
             setCart([]);
             navigate("success");
